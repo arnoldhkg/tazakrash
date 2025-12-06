@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="kk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Сандық</title>
+<style>
+:root{
+  --bg: #0f1724;
+  --panel: #0b1220;
+  --card: rgba(255,255,255,0.03);
+  --muted: #9aa4b2;
+  --accent: #4f46e5;
+  --accent-600: #5b4ef5;
+  --text: #e6eef8;
+  --radius: 12px;
+  --glass: rgba(255,255,255,0.02);
+}
+:root.light{
+  --bg: #ffffff;
+  --panel: #f5f5f5;
+  --card: rgba(0,0,0,0.05);
+  --muted: #555;
+  --accent: #4f46e5;
+  --accent-600: #5b4ef5;
+  --text: #111;
+  --glass: rgba(0,0,0,0.04);
+}
+*{box-sizing:border-box}
+html,body,#app{height:100%;margin:0}
+body{background:var(--bg);color:var(--text);font-family:Inter, Arial, sans-serif;margin:0}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--glass)}
+.brand{display:flex;gap:12px;align-items:center}
+.brand h1{font-size:16px;margin:0;font-weight:700}
+.controls{display:flex;gap:8px;align-items:center}
+.icon-btn{background:transparent;border:1px solid transparent;padding:8px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.icon-btn:hover{background:var(--card)}
+.wrap{display:flex;gap:14px;padding:14px;height:calc(100% - 68px);}
+.sidebar{width:320px;background:var(--panel);border-radius:var(--radius);padding:14px;display:flex;flex-direction:column;overflow:auto}
+.search{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.search input{flex:1;padding:10px;border-radius:10px;border:none;background:var(--card);color:var(--text)}
+.tabs-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tab{padding:8px 10px;border-radius:10px;background:transparent;border:1px solid transparent;color:var(--muted);cursor:pointer}
+.tab.active{background:linear-gradient(90deg,var(--accent-600),var(--accent));color:white;border:1px solid rgba(0,0,0,0.12);}
+.section-title{font-size:13px;color:var(--muted);margin:6px 0}
+.lesson-list{display:flex;flex-direction:column;gap:8px}
+.lesson-item{display:flex;gap:10px;align-items:center;padding:10px;border-radius:10px;background:transparent;border:1px solid transparent;cursor:pointer}
+.lesson-item:hover{background:var(--card)}
+.lesson-item.active{background:linear-gradient(90deg, rgba(91,78,245,0.12), rgba(79,70,229,0.06));border-left:4px solid var(--accent)}
+.lesson-thumb{width:44px;height:34px;border-radius:6px;background:linear-gradient(180deg, rgba(0,0,0,0.2), rgba(0,0,0,0.1));display:flex;align-items:center;justify-content:center}
+.lesson-title{font-weight:600;font-size:14px}
+.lesson-meta{font-size:12px;color:var(--muted)}
+.subject-list{display:flex;flex-direction:column;gap:10px}
+.subject-card{display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;cursor:pointer;background:var(--card)}
+.subject-card img{width:56px;height:40px;object-fit:cover;border-radius:8px}
+.subject-name{font-weight:700}
+.main{flex:1;overflow:auto}
+.content{background:var(--panel);padding:18px;border-radius:var(--radius);min-height:200px}
+.player-wrap{display:flex;gap:18px}
+.player{flex:1;min-width:260px}
+.preview{border-radius:12px;overflow:hidden;background:#000}
+.preview iframe{width:100%;height:420px;border:0;display:block}
+.side-info{width:360px}
+.card{background:var(--card);padding:12px;border-radius:10px}
+.small{font-size:13px;color:var(--muted);margin-top:8px}
+#homeBtn{cursor:pointer;padding:6px 12px;border-radius:8px;background:var(--card);transition:0.18s}
+#homeBtn:hover{background:var(--accent);color:#fff}
+.logout-btn{cursor:pointer;padding:6px 12px;border-radius:8px;background:transparent;border:1px solid var(--glass);color:var(--muted)}
+.logout-btn:hover{background:var(--card)}
+/* mobile adjustments */
+@media(max-width:900px){
+  .wrap{flex-direction:column;padding:10px;height:calc(100% - 68px)}
+  .sidebar{width:100%;order:2;padding:10px}
+  .main{order:1}
+  .player-wrap{flex-direction:column}
+  .preview iframe{height:260px}
+  .side-info{width:100%}
+}
+.tab, .lesson-item, .icon-btn{transition:all .18s ease}
+
+/* ---- PASSWORD MODAL ---- */
+#pwOverlay{
+  position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.6);z-index:9999;
+}
+#pwBox{
+  background:var(--panel);padding:22px;border-radius:12px;width:360px;max-width:92%;
+  box-shadow:0 8px 30px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.04);
+}
+#pwBox h2{margin:0 0 8px;font-size:18px}
+#pwBox p{margin:0 0 12px;color:var(--muted);font-size:13px}
+#pwBox input{width:100%;padding:10px;border-radius:8px;border:none;background:var(--card);color:var(--text);margin-bottom:10px}
+#pwBox .row{display:flex;gap:8px;justify-content:flex-end}
+#pwBox button{padding:8px 12px;border-radius:8px;border:none;background:var(--accent);color:#fff;cursor:pointer}
+#pwError{color:#ff8686;font-size:13px;margin-top:6px;display:none}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <a id="homeBtn">Басты бет</a>
+    <h1 id="pageTitle">Сандық</h1>
+  </div>
+  <div class="controls">
+    <button id="themeToggle" class="icon-btn" title="Тақырыпты ауыстыру"></button>
+    <button id="logoutBtn" class="logout-btn" title="Шығу" style="display:none">Шығу</button>
+  </div>
+</header>
+<div class="wrap" id="app">
+  <aside class="sidebar" id="sidebar">
+    <!-- Subjects list (shown when no subject selected) -->
+    <div id="subjectsView">
+      <div class="section-title">Пәндер</div>
+      <div id="subjectsList" class="subject-list"></div>
+    </div>
+
+    <!-- Subject detail controls (shown when a subject is selected) -->
+    <div id="subjectDetail" style="display:none">
+      <div class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/></svg>
+        <input id="searchInput" placeholder="Іздеу" />
+      </div>
+
+      <div class="section-title">Айлар</div>
+      <div id="monthsTabs" class="tabs-row"></div>
+
+      <div class="section-title">Апталар</div>
+      <div id="weeksTabs" class="tabs-row"></div>
+
+      <div class="section-title">Барлық сабақтар</div>
+      <div id="lessons" class="lesson-list"></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="content">
+      <div class="player-wrap">
+        <div class="player">
+          <div id="videoTitle" style="font-size:18px;font-weight:700;margin-bottom:12px">Пән таңдаңыз</div>
+          <div class="preview card" id="playerPreview" style="height:420px;display:flex;align-items:center;justify-content:center;color:var(--muted)">Плеер</div>
+        </div>
+        <aside class="side-info">
+          <div class="card">
+            <div style="font-weight:700">Сабаққа арналған материалдар</div>
+            <div id="materialsList" class="small" style="margin-top:10px;color:var(--muted)">Мұнда PDF сілтемелері көрсетіледі.</div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+<footer style="padding:10px 18px;color:var(--muted);font-size:13px"> ©JUZ40TAR</footer>
+
+<!-- PASSWORD OVERLAY -->
+<div id="pwOverlay" style="display:none">
+  <div id="pwBox">
+    <h2>Кіру (пароль қажет)</h2>
+    <p>Сайтқа кіру үшін пароль енгізіңіз.</p>
+    <input id="pwInput" type="password" placeholder="Пароль">
+    <div class="row">
+      <button id="pwSubmit">Кіру</button>
+    </div>
+    <div id="pwError">Қате пароль — қайта тырысыңыз.</div>
+  </div>
+</div>
+
+<script>
+(() => {
+  /* ----------------     CONFIG ---------------- */
+  const SITE_PASSWORD = '140'; // <- поменяй пароль тут если нужно
+  const AUTH_KEY = 'juz_auth_v1';
+
+  /* --------- DOM SHORTCUTS --------- */
+  const root = document.documentElement;
+  const themeToggle = document.getElementById('themeToggle');
+  const searchInput = document.getElementById('searchInput');
+  const monthsTabs = document.getElementById('monthsTabs');
+  const weeksTabs = document.getElementById('weeksTabs');
+  const lessonsEl = document.getElementById('lessons');
+  const playerPreview = document.getElementById('playerPreview');
+  const videoTitle = document.getElementById('videoTitle');
+  const subjectsList = document.getElementById('subjectsList');
+  const subjectsView = document.getElementById('subjectsView');
+  const subjectDetail = document.getElementById('subjectDetail');
+  const homeBtn = document.getElementById('homeBtn');
+  const pageTitle = document.getElementById('pageTitle');
+  const pwOverlay = document.getElementById('pwOverlay');
+  const pwInput = document.getElementById('pwInput');
+  const pwSubmit = document.getElementById('pwSubmit');
+  const pwError = document.getElementById('pwError');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const materialsList = document.getElementById('materialsList');
+
+  /* ----------------- STATE ----------------- */
+  const state = { subjects: [] };
+  let current = { subjectId: null, monthId: null, weekId: null, lessonId: null };
+
+  /* ---------- THEME ---------- */
+  function setTheme(isLight){
+    if(isLight) root.classList.add('light'); else root.classList.remove('light');
+    themeToggle.innerHTML = isLight ? sunIcon() : moonIcon();
+  }
+  const savedTheme = localStorage.getItem('juz_theme');
+  setTheme(savedTheme === 'light');
+  themeToggle.onclick = ()=>{ const isLight = root.classList.toggle('light'); localStorage.setItem('juz_theme', isLight ? 'light' : 'dark'); setTheme(isLight); };
+
+  /* ---------- ICONS ---------- */
+  function playIcon(){return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 3v18l15-9L5 3z" fill="currentColor"/></svg>`}
+  function pdfIcon(){ return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" stroke="currentColor" stroke-width="1.2" fill="currentColor"/></svg>`}
+  function moonIcon(){return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/></svg>`}
+  function sunIcon(){return `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
+
+  /* ---------- HELPERS ---------- */
+  function el(tag, props={}, children=''){const e=document.createElement(tag);Object.entries(props).forEach(([k,v])=>{if(k==='class')e.className=v;else if(k==='html')e.innerHTML=v;else e.setAttribute(k,v)});if(children) e.innerHTML+=children;return e}
+
+  /* ---------- DATA API (addSubject) ---------- */
+  function addSubject(name, icon, monthsData){
+    const subj = { id: 's'+(state.subjects.length+1), name, icon, months: monthsData.map((m,i)=>({ id:'m'+(i+1), title:m[0], weeks:m[1].map((w,j)=>({ id:'w'+(i+1)+'_'+(j+1), title:w[0], resources: w[1].map((r,k)=>{
+      // allow resource to be either [title,url] or {title,url,type}
+      if(Array.isArray(r)) return { id:'r'+(i+1)+'_'+(j+1)+'_'+(k+1), title:r[0], url:r[1] };
+      return { id:'r'+(i+1)+'_'+(j+1)+'_'+(k+1), title:r.title, url:r.url, type:r.type };
+    }) })) })) };
+    state.subjects.push(subj);
+  }
+
+  /* ---------- SAMPLE DATA (keep your structure) ---------- */
+  addSubject("Тарих", "https://juz40-edu.kz/assets/img/subjects/kz-history.jpg", [
+    ["1 АЙ", [
+      ["1-апта", [
+
+        ["ТАРИХ: 1.1-АПТА ОҚУЛЫҚ","https://files-api4.juz40-edu.kz/prod-bucket/methodist/course/429a1166-2577-4bfa-a122-b77e301f01d4/edde9199-7e0e-40e1-8709-41667b03879a_ТАРИХ-1.1-АПТА-ОҚУЛЫҚ-(10-С---10-27).pdf"],
+        ["ТАРИХ: 1-АПТА БАЗА", "https://files-api4.juz40-edu.kz/prod-bucket/methodist/course/d0ff3f59-4d4e-487d-b533-3b40acab89cd/3ccd3ac9-a041-4b51-9fab-26d9737cad76_%D0%A2%D0%B0%D1%80%D0%B8%D1%85---%D0%A2%D0%B0%D1%80%D0%B8%D1%85-1-%D0%B0%D0%B8%CC%86-1-%D0%B0%D0%BF%D1%82%D0%B0-smart-(1).pdf"],
+        ["ТАРИХ: 1.1-АПТА КІРІСПЕ САБАҚ", "https://kinescope.io/aRp57tbymJ3qtoPXYwYFxn?"],
+        ["ТАРИХ: 1-АПТА №1 ВИДЕОСАБАҚ", "https://kinescope.io/tLbQhKrgdPvQ4y1xNSVMBR?"],
+        ["ТАРИХ: 1-АПТА №2 ВИДЕОСАБАҚ", "https://kinescope.io/iZWUjCEe7eY62sLCtDLMfH?"],
+        ["ТАРИХ: 1-АПТА №3 ВИДЕОСАБАҚ", "https://kinescope.io/ngBY2nctY56Xct7HVpRkon?"],
+        ["ТАРИХ: 1-АПТА №4 ВИДЕОСАБАҚ", "https://kinescope.io/pH1Dw2GoriF1bvQHmjL89S?"],
+        ["1-АЙ 1-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1sqKUAyh-wrbYa12gsrYPSQiyW6FV6tpM/view?usp=sharing"],
+        ["1-АЙ 1-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1-SotvgWWUyDhptj5fE0jhXSkusJH14F2/view?usp=sharing"],
+      ]],
+       ["2-апта", [
+        ["ТАРИХ: 1.2-АПТА БАЗА", "https://files-api4.juz40-edu.kz/prod-bucket/methodist/course/d0ff3f59-4d4e-487d-b533-3b40acab89cd/0a9c00a3-09ba-4189-ab8d-8c50ffa22530_%D0%A2%D0%B0%D1%80%D0%B8%D1%85---%D0%A2%D0%B0%D1%80%D0%B8%D1%85-1-%D0%B0%D0%B8%CC%86-2-%D0%B0%D0%BF%D1%82%D0%B0-smart-(1).pdf"],
+        ["ТАРИХ: 2-АПТА №1 ВИДЕОСАБАҚ", "https://kinescope.io/xzFL4QzqKzny52kXNAxQya?"],
+        ["ТАРИХ: 2-АПТА №2 ВИДЕОСАБАҚ", "https://kinescope.io/jXYXtEC7UuVJot3CNuLqGW?"],
+        ["1-АЙ 2-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1eyON_QuSYmrvZmMG7Z08GMHbQPr15bF9/view?usp=sharing"],
+        ["1-АЙ 2-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1Lhs-q0BZpVXQgp1P24TEkIk6yDzfs9eJ/view?usp=sharing"],
+    ]],
+        ["3-апта", [
+        ["ТАРИХ: 1.2-АПТА БАЗА", "https://files-api4.juz40-edu.kz/prod-bucket/methodist/course/d0ff3f59-4d4e-487d-b533-3b40acab89cd/680e77f5-1df0-41d7-8483-fb88f4e071a7_%D0%A2%D0%B0%D1%80%D0%B8%D1%85---%D0%A2%D0%B0%D1%80%D0%B8%D1%85-1-%D0%B0%D0%B9-3-%D0%B0%D0%BF%D1%82%D0%B0-smart.pdf"],
+        ["ТАРИХ: 3-АПТА №1 ВИДЕОСАБАҚ", "https://kinescope.io/5NHiehBsYEyejSd8e9o8h8?"],
+        ["ТАРИХ: 3-АПТА №2 ВИДЕОСАБАҚ", "https://kinescope.io/t8JUgkMfMEV3fAr4QCFACc?"],
+        ["ТАРИХ: 3-АПТА №3 ВИДЕОСАБАҚ", "https://kinescope.io/8ZUVB931UcshU5VpvVEq4t?"],
+        ["ТАРИХ: 3-АПТА №4 ВИДЕОСАБАҚ", "https://kinescope.io/7L4CXDsPKLhLdgFgXuytZq?"],
+        ["ТАРИХ: 3-АПТА №5 ВИДЕОСАБАҚ", "https://kinescope.io/7T9ro4NXjRBTveFKpACFG4?"],
+        ["1-АЙ 3-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/11cW4lxPJUHIZAVazQJKywOofepHQU9n4/view?usp=sharing"],
+        ["1-АЙ 3-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1AEZzSS6s8pmLfYvwEVZzRtV75zEE-Nkf/view?usp=sharing"],
+
+    ]],
+        ["4-апта", [
+        ["ТАРИХ: 1.2-АПТА БАЗА", "https://files-api4.juz40-edu.kz/prod-bucket/methodist/course/d0ff3f59-4d4e-487d-b533-3b40acab89cd/5167c1a6-ada6-417f-b61c-6e55d354d095_%D0%A2%D0%B0%D1%80%D0%B8%D1%85---%D0%A2%D0%B0%D1%80%D0%B8%D1%85-1-%D0%B0%D0%B9-4-%D0%B0%D0%BF%D1%82%D0%B0-smart-(2).pdf"],
+        ["ТАРИХ: 4-АПТА №1 ВИДЕОСАБАҚ", "https://kinescope.io/j6NQyLUXi7owDP3b658Way?"],
+        ["ТАРИХ: 4-АПТА №2 ВИДЕОСАБАҚ", "https://kinescope.io/agRHkGfJb17oQdY4ziXGBM?"],
+        ["ТАРИХ: 4-АПТА №3 ВИДЕОСАБАҚ", "https://kinescope.io/6maNBKXAZjpHfP93Xdyhep?"],
+        ["ТАРИХ: 4-АПТА №4 ВИДЕОСАБАҚ", "https://kinescope.io/jJnSzNaGcy9U7fiJSBcnhp?"],
+        ["1-АЙ 4-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1VZPXDtHhSTE6dJpjLPFnU_S9Q-4eZPoc/view?usp=sharing"],
+        ["1-АЙ 4-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1H4H5a8ynqohBF6LzYtHuWRCOm04HLbPr/view?usp=sharing"],
+
+    ]],
+        
+    ]],
+     ["2 АЙ", [
+      ["1-апта", [
+        ["ТАРИХ: 2.1-АПТА БАЗА", "https://files-api4.juz40-edu.kz/prod-bucket/methodist/course/d0ff3f59-4d4e-487d-b533-3b40acab89cd/6a71a4ec-9b23-44a4-9f01-92441b8b1d7c_%D0%A2%D0%B0%D1%80%D0%B8%D1%85---%D0%A2%D0%B0%D1%80%D0%B8%D1%85-2-%D0%B0%D0%B8%CC%86-1-%D0%B0%D0%BF%D1%82%D0%B0-smart-(1-4).pdf"],
+        ["ТАРИХ: 1-АПТА №1 ВИДЕОСАБАҚ", "https://kinescope.io/twRifytMh4PCZ1jKvhXYLD?"],
+        ["ТАРИХ: 1-АПТА №2 ВИДЕОСАБАҚ", "https://kinescope.io/viKzLJEat5k9AfyHnFoJKc?"],
+        ["ТАРИХ: 1-АПТА №3 ВИДЕОСАБАҚ", "https://kinescope.io/9e14j1mf7NgNoDP8bwQnuE?"],
+        ["ТАРИХ: 1-АПТА №4 ВИДЕОСАБАҚ", "https://kinescope.io/sP5dBpLCLKJhQLPFgJh4ka?"],
+        ["2-АЙ 1-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1zAtFvn66ai3vgRlLrS0lKBduln73F3fH/view?usp=sharing"],
+        ["2-АЙ 1-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1J5yTVRwIhEf3ch9t-OExZeEm9F1_SLPG/view?usp=sharing"],
+
+    ]],
+        ["2-апта", [
+        ["ТАРИХ: 2.2-АПТА БАЗА", "https://files-api4.juz40-edu.kz/prod-bucket/methodist/course/d0ff3f59-4d4e-487d-b533-3b40acab89cd/608d5b59-c04f-48dd-8664-9e725acca349_%D0%A2%D0%B0%D1%80%D0%B8%D1%85---%D0%A2%D0%B0%D1%80%D0%B8%D1%85-2-%D0%B0%D0%B8%CC%86-2-%D0%B0%D0%BF%D1%82%D0%B0-smart-(2-1-2-2).pdf"],
+        ["ТАРИХ: 2-АПТА №1 ВИДЕОСАБАҚ", "https://kinescope.io/pYpcT4sLMCh2bKTcAmcqgE?"],
+        ["ТАРИХ: 2-АПТА №2 ВИДЕОСАБАҚ", "https://kinescope.io/joq99ahshKf4wTnz7Hjy5h?"],
+        ["ТАРИХ: 2-АПТА №3 ВИДЕОСАБАҚ", "https://kinescope.io/e7UofmzrFFJVP3d6yRVRzz?"],
+        ["ТАРИХ: 2-АПТА №4 ВИДЕОСАБАҚ", "https://kinescope.io/2njYzKFhH4UbkgFD7Hae6R?"],
+        ["ТАРИХ: 2-АПТА №5 ВИДЕОСАБАҚ", "https://kinescope.io/3ye9wcKkVvafQ1i4nR879E?"],
+        ["ТАРИХ: 2-АПТА №6 ВИДЕОСАБАҚ", "https://kinescope.io/uyDDRp5Keyy7A2ZwG93XPZ?"],
+        ["ТАРИХ: 2-АПТА №7 ВИДЕОСАБАҚ", "https://kinescope.io/uQZxciRWPazUDCvxi9F66F?"],
+        ["ТАРИХ: 2-АПТА №8 ВИДЕОСАБАҚ", "https://kinescope.io/3qRLWe3HHzGXVFvvJajn3C?"],
+        ["2-АЙ 1-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1WLm77JEI_bM7KWEdDdM-G8pnZZYcMM99/view?usp=sharing"],
+        ["2-АЙ 1-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1ig_or-Uz5EhkxVoRdmCibPCRrgiI_Dcl/view?usp=sharing"],
+
+    ]],
+    ["3-апта", [
+        ["ТАРИХ: 2.3-АПТА БАЗА", ""],
+        ["ТАРИХ: 3-АПТА №1 ВИДЕОСАБАҚ", "https://kinescope.io/3DH9YuhXatASqHjZiL21Xz?"],
+        ["ТАРИХ: 3-АПТА №2 ВИДЕОСАБАҚ", "https://kinescope.io/ccRteKHj8Ja2ZYXpgXciYL?"],
+        ["ТАРИХ: 3-АПТА №3 ВИДЕОСАБАҚ", "https://kinescope.io/69V9YwMS5f7wYmopKaXsdR?"],
+        ["ТАРИХ: 3-АПТА №4 ВИДЕОСАБАҚ", "https://kinescope.io/7XcGxd67HhSV5S1edPWs6U?"],
+        ["ТАРИХ: 3-АПТА №5 ВИДЕОСАБАҚ", "https://kinescope.io/6oZjR87zjvZ6gssyT1XxrU?"],
+        ["ТАРИХ: 3-АПТА №6 ВИДЕОСАБАҚ", "https://kinescope.io/5UZ64r8CxLPf7KGdZNHrQe?"],
+        ["ТАРИХ: 3-АПТА №7 ВИДЕОСАБАҚ", "https://kinescope.io/htJ6De4LwiXqv5ZaJGapBp?"],
+        ["ТАРИХ: 3-АПТА №8 ВИДЕОСАБАҚ", "https://kinescope.io/98K9NS7Xt6VUVtNZCJN2dG?"],
+        ["2-АЙ 3-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ","https://files-api4.juz40-edu.kz/prod-bucket/methodist/course/d0ff3f59-4d4e-487d-b533-3b40acab89cd/439fa0c3-61b8-4f78-8d96-bdee8f8d3060_%D0%A2%D0%B0%D1%80%D0%B8%D1%85-%D0%A2%D0%B0%D1%80%D0%B8%D1%85-2-%D0%B0%D0%B9-3-%D0%B0%D0%BF%D1%82%D0%B0-smart-2-1-2-3-1.pdf"],
+        ["2-АЙ 3-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ",""],
+
+    ]],
+["4-апта", [
+        ["ТАРИХ: 2.4-АПТА БАЗА", "https://files-api5.juz40-edu.kz/prod-bucket/methodist/course/d0ff3f59-4d4e-487d-b533-3b40acab89cd/d22fd933-8944-4ea8-b9c6-7e4d10f014b7_%D0%A2%D0%B0%D1%80%D0%B8%D1%85---%D0%A2%D0%B0%D1%80%D0%B8%D1%85-2-%D0%B0%D0%B9-4-%D0%B0%D0%BF%D1%82%D0%B0-smart-(3).pdf"],
+        ["ТАРИХ: 4-АПТА №1 ВИДЕОСАБАҚ", "https://kinescope.io/xs4exwHY6brifqz6YHrggZ?"],
+        ["ТАРИХ: 4-АПТА №2 ВИДЕОСАБАҚ", "https://kinescope.io/vWEcJp4mZjgiLJ59W4WCVc?"],
+        ["ТАРИХ: 4-АПТА №3 ВИДЕОСАБАҚ", "https://kinescope.io/vRLd5E4dPkJujZDHdjtXvd?"],
+        ["ТАРИХ: 4-АПТА №4 ВИДЕОСАБАҚ", "https://kinescope.io/usok4AmRmpPkggnc3FMj6T?"],
+        ["2-АЙ 4-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1EMTIkYVjVzlJtm29g9iordrDDsGOqEl-/view?usp=sharing"],
+        ["2-АЙ 4-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1zH3wQbaeLEsVF-9dDR2PSFCRkz2bVZ-7/view?usp=sharing"],
+
+    ]],
+        
+
+    ]],
+    ["3 АЙ", [
+      ["1-апта",
+       [["ТАРИХ: 3.1-АПТА БАЗА","https://files-api5.juz40-edu.kz/prod-bucket/methodist/course/d0ff3f59-4d4e-487d-b533-3b40acab89cd/55b70375-1f3e-48bf-9fff-b88ca85a6920_%D0%A2%D0%B0%D1%80%D0%B8%D1%85-%D0%A2%D0%B0%D1%80%D0%B8%D1%85-3-%D0%B0%D0%B9-1-%D0%B0%D0%BF%D1%82%D0%B0-smart-2-2-35-1.pdf"],
+        ["ТАРИХ: 3.1-АПТА №1 ВИДЕОСАБАҚ","https://kinescope.io/otgrevd6cvwxThxdN8oeUs"],
+        ["ТАРИХ: 3.1-АПТА №2 ВИДЕОСАБАҚ","https://kinescope.io/c9uRiy8ETRDVNeHagK3Gju"],
+        ["ТАРИХ: 3.1-АПТА №3 ВИДЕОСАБАҚ","https://kinescope.io/da5w8jvbjUtjpeGcmKfh49"],
+        ["ТАРИХ: 3.1-АПТА №4 ВИДЕОСАБАҚ","https://kinescope.io/e8fYF8MW7jJopxGf3dZvwX"],
+        ["ТАРИХ: 3.1-АПТА №5 ВИДЕОСАБАҚ","https://kinescope.io/0C3yW4tV1th4n6C8BZaRVA"],
+        ["3-АЙ 1-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1FBQN9hf64Y9hHN36i2_63xzVMF9xdQhA/view"],
+        ["3-АЙ 1-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1c3jwov9B1cCFSVwNGypefBcnFSN--OLE/view?usp=sharing"],
+        ]],
+        ["2-апта",
+       [["ТАРИХ: 3.2-АПТА БАЗА","https://files-api4.juz40-edu.kz/prod-bucket/methodist/course/d0ff3f59-4d4e-487d-b533-3b40acab89cd/ac462822-e766-481e-a417-38306524f946_%D0%A1%D0%9C%D0%90%D0%A0%D0%A2-%D0%91%D0%90%D0%97%D0%90-3.2.pdf"],
+        ["ТАРИХ: 3.2-АПТА №1 ВИДЕОСАБАҚ","https://kinescope.io/mALLKnHy2DzLigyBgNHJiZ"],
+        ["ТАРИХ: 3.2-АПТА №2 ВИДЕОСАБАҚ","https://kinescope.io/fPJtgkN6abRzdsEPnfdT71"],
+        ["ТАРИХ: 3.2-АПТА №3 ВИДЕОСАБАҚ","https://kinescope.io/2zxnVJzRYxNffUUkQKwVwt"],
+        ["ТАРИХ: 3.2-АПТА №4 ВИДЕОСАБАҚ","https://kinescope.io/bk2awoogvMGLRzyGK9mpYh"],
+        ["ТАРИХ: 3.2-АПТА №5 ВИДЕОСАБАҚ","https://kinescope.io/hHAHPVuhfEjoBjMZXVxKU7"],
+        ["ТАРИХ: 3.2-АПТА №6 ВИДЕОСАБАҚ","https://kinescope.io/etAbFFcxvZDL4P7pGhYZzo"],
+        ["3-АЙ 1-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1FBQN9hf64Y9hHN36i2_63xzVMF9xdQhA/view"],
+        ["3-АЙ 1-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1c3jwov9B1cCFSVwNGypefBcnFSN--OLE/view?usp=sharing"],
+        ]],
+        ["3-апта",
+       [["ТАРИХ: 3.3-АПТА БАЗА","https://files-api5.juz40-edu.kz/prod-bucket/methodist/course/d0ff3f59-4d4e-487d-b533-3b40acab89cd/422d3139-b656-4bbd-be47-4b52fb56914a_%D0%A2%D0%B0%D1%80%D0%B8%D1%85-%D0%A2%D0%B0%D1%80%D0%B8%D1%85-3-%D0%B0%D0%B9-3-%D0%B0%D0%BF%D1%82%D0%B0-smart-2-4jun-13-14.pdf"],
+        ["ТАРИХ: 3.3-АПТА №1 ВИДЕОСАБАҚ","https://kinescope.io/2CB1n3aSkEA76EUU7AATBZ"],
+        ["ТАРИХ: 3.3-АПТА №2 ВИДЕОСАБАҚ","https://kinescope.io/oHkng9k3RsfQGv1hXTSTep"],
+        ["ТАРИХ: 3.3-АПТА №3 ВИДЕОСАБАҚ","https://kinescope.io/fNmRc8wiPmAiNpsYqjs5tc"],
+        ["3-АЙ 3-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1EWz2GnSGhvI-btlU5gkitGrjaI9Rvjf5/view?usp=sharing"],
+        ["ТАРИХ: 3.3-АПТА №4 ВИДЕОСАБАҚ","https://kinescope.io/hcCMnNJeu92pgctK1BJGbA"],
+        ["ТАРИХ: 3.3-АПТА №5 ВИДЕОСАБАҚ","https://kinescope.io/3hKvSWmrLJWAvsv3GtFMNf"],
+        ["ТАРИХ: 3.3-АПТА №6 ВИДЕОСАБАҚ","https://kinescope.io/w38sVNZrnsJ1BnQiP8Gpwi"],
+        ["3-АЙ 3-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/14-Y6bnmlOnz5F3TS7K65sfZLz6eaQaDE/view"],
+      ]],
+        ["4-апта",
+       [["ТАРИХ: 3.4-АПТА БАЗА","https://files-api5.juz40-edu.kz/prod-bucket/methodist/course/d0ff3f59-4d4e-487d-b533-3b40acab89cd/629d964a-3701-4807-898a-c749be24de82_%D0%A2%D0%B0%D1%80%D0%B8%D1%85-%D0%A2%D0%B0%D1%80%D0%B8%D1%85-3-%D0%B0%D0%B9-4-%D0%B0%D0%BF%D1%82%D0%B0-smart-last-1-2-paragraph-junior-3-1-1.pdf"],
+        ["ТАРИХ: 3.4-АПТА №1 ВИДЕОСАБАҚ","https://kinescope.io/aWZDWctjeAMJTVJQsWTzV4"],
+        ["ТАРИХ: 3.4-АПТА №2 ВИДЕОСАБАҚ","https://kinescope.io/pkjHkmW1EJUT1SJaGpxxWM"],
+        ["ТАРИХ: 3.4-АПТА №3 ВИДЕОСАБАҚ","https://kinescope.io/k8bZ8acNxGwiz7umbrm7R8"],
+        ["ТАРИХ: 3.4-АПТА №4 ВИДЕОСАБАҚ","https://kinescope.io/4WoMPMA7p8C9KNYcTgE87r"],
+        ["ТАРИХ: 3.4-АПТА №5 ВИДЕОСАБАҚ","https://kinescope.io/at1aSzcWptU73WGpSVfi4R"],
+        ["ТАРИХ: 3.4-АПТА №6 ВИДЕОСАБАҚ","https://kinescope.io/wPyFfth8vAcAAYcdjjvSbC"],
+        ["ТАРИХ: 3.4-АПТА №7 ВИДЕОСАБАҚ","https://kinescope.io/eG1NzWeNusY5u3fSF6KuGC"],
+        ["ТАРИХ: 3.4-АПТА №8 ВИДЕОСАБАҚ","https://kinescope.io/cNdvtX9sYMWYh46qr8H9nz"],
+        ["ТАРИХ: 3.4-АПТА №9 ВИДЕОСАБАҚ","https://kinescope.io/oDYCYjFyA1APjFtmcehPqV"],
+        ["3-АЙ 4-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1BrcnpWw-9N4c5hF1YzzIX3gqYO86XMbg/view?usp=sharing"],
+        ["3-АЙ 4-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1rgW7TL-xyXEtuIZ2Ze7XhZFK3IRpk-CO/view?usp=sharing"],
+        ]],
+    ]],
+    ["4 АЙ", [
+      ["1-апта",
+       [["ТАРИХ: 4.1-АПТА БАЗА","https://files-api5.juz40-edu.kz/prod-bucket/methodist/course/d0ff3f59-4d4e-487d-b533-3b40acab89cd/5834b400-32c9-4fdc-b830-1071300eacde_%D0%A2%D0%B0%D1%80%D0%B8%D1%85---%D0%A2%D0%B0%D1%80%D0%B8%D1%85-4-%D0%B0%D0%B9-1-%D0%B0%D0%BF%D1%82%D0%B0-smart-().pdf"],
+        ["ТАРИХ: 4.1-АПТА №1 ВИДЕОСАБАҚ","https://kinescope.io/wTdgbeujW3cSZiz2npBvxx"],
+        ["ТАРИХ: 4.1-АПТА №2 ВИДЕОСАБАҚ","https://kinescope.io/h6iFCiA1M7W8M2THDfUvmo"],
+        ["ТАРИХ: 4.1-АПТА №3 ВИДЕОСАБАҚ","https://kinescope.io/cBuVnD6ayxW4SRpzsPpzHC"],
+        ["ТАРИХ: 4.1-АПТА №4 ВИДЕОСАБАҚ","https://kinescope.io/vpiuKKm3NtQsVbQ76M2zmn"],
+        ["4-АЙ 1-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1ztli6Ur6HKGRD3YyE7M3AmdzG7q7Lrak/view?usp=sharing"],
+        ["4-АЙ 1-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1cRCWzXSfN5TcqCCT3pFMp_wI8iCiPx__/view?usp=sharing"],
+        ]],
+        ["2-апта",
+       [["ТАРИХ: 4.2-АПТА БАЗА","https://files-api5.juz40-edu.kz/prod-bucket/methodist/course/d0ff3f59-4d4e-487d-b533-3b40acab89cd/d20e9d4f-932a-4a6d-a33e-7ebcefca00c1_%D0%A2%D0%B0%D1%80%D0%B8%D1%85---%D0%A2%D0%B0%D1%80%D0%B8%D1%85-4-%D0%B0%D0%B9-2-%D0%B0%D0%BF%D1%82%D0%B0-smart-()-(1).pdf"],
+        ["ТАРИХ: 4.2-АПТА №1 ВИДЕОСАБАҚ","https://kinescope.io/iQNTpsgCJDJoz5P5FugZ5g"],
+        ["ТАРИХ: 4.2-АПТА №2 ВИДЕОСАБАҚ","https://kinescope.io/ic3RFQJ7fiCbnpcxv1Xfum"],
+        ["ТАРИХ: 4.2-АПТА №3 ВИДЕОСАБАҚ","https://kinescope.io/aGt5qDae7QKdQxgsTaqnNf"],
+        ["ТАРИХ: 4.2-АПТА №4 ВИДЕОСАБАҚ","https://kinescope.io/ibddw1VpNEqNkHWzLecrss"],
+        ["4-АЙ 2-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1ey9B63X5aZ0NicZ_pJYih3KxUJCfiNcs/view?usp=sharing"],
+        ["4-АЙ 2-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1ILJ4z516BQmb7Mf6v1abAd0m_-g_vXmH/view?usp=sharing"],
+        ]],
+        ["3-апта",
+       [["ТАРИХ: 4.3-АПТА БАЗА","https://files-api5.juz40-edu.kz/prod-bucket/methodist/course/d0ff3f59-4d4e-487d-b533-3b40acab89cd/4fdbeac3-7643-498a-9290-80daaca3f5fa_%D0%A2%D0%B0%D1%80%D0%B8%D1%85---%D0%A2%D0%B0%D1%80%D0%B8%D1%85-4-%D0%B0%D0%B8%CC%86-3-%D0%B0%D0%BF%D1%82%D0%B0-smart-().pdf"],
+        ["ТАРИХ: 4.3-АПТА №1 ВИДЕОСАБАҚ","https://kinescope.io/uxpxxTjt3zvMcBbB2xUVA8"],
+        ["ТАРИХ: 4.3-АПТА №2 ВИДЕОСАБАҚ","https://kinescope.io/c3fCyHJrYjjYgLaXVm4kGG"],
+        ["ТАРИХ: 4.3-АПТА №3 ВИДЕОСАБАҚ","https://kinescope.io/5y8Ao4MPU6MwVHz9NSCJFx"],
+        ["ТАРИХ: 4.3-АПТА №4 ВИДЕОСАБАҚ","https://kinescope.io/gcLXUNReNJkqTWrAEbdkR3"],
+        ["ТАРИХ: 4.3-АПТА №5 ВИДЕОСАБАҚ","https://kinescope.io/2Rq2p2kap41QHE7Gq2jKun"],
+        ["ТАРИХ: 4.3-АПТА №6 ВИДЕОСАБАҚ","https://kinescope.io/v1QicQggsuWCtF29JEKo8Y"],
+        ["ТАРИХ: 4.3-АПТА №7 ВИДЕОСАБАҚ","https://kinescope.io/bgxge9pittLhYKrsodwWV8"],
+        ["ТАРИХ: 4.3-АПТА №8 ВИДЕОСАБАҚ","https://kinescope.io/8cVYMCck455aLTbX7Pt4uE"],
+        ["4-АЙ 1-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1KVaPB9mRi_YXUH2JiNSB1ttbHZG8Qmj4/view?usp=sharing"],
+        ["4-АЙ 1-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/19h4VpNCJFaVVvmpF64Ev7-oSfprR7UX6/view?usp=sharing"],
+        ]],
+        ["4-апта",
+       [["ТАРИХ: 4.4-АПТА БАЗА","https://files-api5.juz40-edu.kz/prod-bucket/methodist/course/d0ff3f59-4d4e-487d-b533-3b40acab89cd/51213b2a-3198-400a-8994-470c92814c5f_%D0%A2%D0%B0%D1%80%D0%B8%D1%85---%D0%A2%D0%B0%D1%80%D0%B8%D1%85-4-%D0%B0%D0%B8%CC%86-4-%D0%B0%D0%BF%D1%82%D0%B0-smart-().pdf"],
+        ["ТАРИХ: 4.4-АПТА №1 ВИДЕОСАБАҚ","https://kinescope.io/po7AtUUedfDLxXUepJPDpy?"],
+        ["ТАРИХ: 4.4-АПТА №2 ВИДЕОСАБАҚ","https://kinescope.io/9kyU3J1NFzA6bcvkgDbcw6?"],
+        ["ТАРИХ: 4.4-АПТА №3 ВИДЕОСАБАҚ","https://kinescope.io/qgPWEZsMseoUHB28KQRuG1?"],
+        ["ТАРИХ: 4.4-АПТА №4 ВИДЕОСАБАҚ","https://kinescope.io/dnkLhCYbRbfax8XkWyPbAS?"],
+        ["ТАРИХ: 4.4-АПТА №5 ВИДЕОСАБАҚ","https://kinescope.io/czNo9wB5fAGLyXc7NczeYS?"],
+        ["4-АЙ 1-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1a9QGfX14qPleGoKYRGreDNILuQOXMRnb/view?usp=sharing"],
+        ["4-АЙ 1-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1CMdI__3Sxe7ef4sb0qtIofZzd0NiBAkc/view?usp=sharing"],
+        ]],
+    ]],
+   ["5 АЙ", [
+      ["1-апта",
+       [["ТАРИХ: 5.1-АПТА БАЗА","https://files-api5.juz40-edu.kz/prod-bucket/methodist/course/d0ff3f59-4d4e-487d-b533-3b40acab89cd/5680702a-2b37-44bf-881a-d0d49bc6c586_%D0%A2%D0%B0%D1%80%D0%B8%D1%85---%D0%A2%D0%B0%D1%80%D0%B8%D1%85-5-%D0%B0%D0%B8%CC%86-1-%D0%B0%D0%BF%D1%82%D0%B0-smart-().pdf"],
+        ["ТАРИХ: 5.1-АПТА №1 ВИДЕОСАБАҚ","https://kinescope.io/c9NwE7NfeSGHrrEhK796Qw?"],
+        ["ТАРИХ: 5.1-АПТА №2 ВИДЕОСАБАҚ","https://kinescope.io/fwFRbdirDuUnAxFQ8waZjq?"],
+        ["ТАРИХ: 5.1-АПТА №3 ВИДЕОСАБАҚ","https://kinescope.io/srxei9SchrwQqeknEC5LmV?"],
+        ["ТАРИХ: 5.1-АПТА №4 ВИДЕОСАБАҚ","https://kinescope.io/tiSah9gCmpw6tsMPDXKyr4?"],
+        ["ТАРИХ: 5.1-АПТА №5 ВИДЕОСАБАҚ","https://kinescope.io/uVxVWRogv5MJrXjjo8LCSR?"],
+        ["ТАРИХ: 5.1-АПТА №6 ВИДЕОСАБАҚ","https://kinescope.io/ntFY3PsTxuPiFzzE5wz7qH?"],
+        ["4-АЙ 1-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1YVoeY5vs2Z3NA9lB3u5m8-lP1y6awPfZ/view?usp=sharing"],
+        ["4-АЙ 1-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ","https://drive.google.com/file/d/1JTK50lmMyIZCtaKsnN05N5fumGZfLJl3/view?usp=drivesdk"],
+        ]],
+       ["2-апта",
+       [["ТАРИХ: 5.2-АПТА БАЗА",""],
+        ["ТАРИХ: 5.2-АПТА №1 ВИДЕОСАБАҚ",""],
+        ["ТАРИХ: 5.2-АПТА №2 ВИДЕОСАБАҚ",""],
+        ["ТАРИХ: 5.2-АПТА №3 ВИДЕОСАБАҚ",""],
+        ["ТАРИХ: 5.2-АПТА №4 ВИДЕОСАБАҚ",""],
+        ["ТАРИХ: 5.2-АПТА №5 ВИДЕОСАБАҚ",""],
+        ["4-АЙ 1-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ",""],
+        ["4-АЙ 1-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ",""],
+        ]],
+        ["3-апта",
+       [["ТАРИХ: 5.3-АПТА БАЗА",""],
+        ["ТАРИХ: 5.3-АПТА №1 ВИДЕОСАБАҚ",""],
+        ["ТАРИХ: 5.3-АПТА №2 ВИДЕОСАБАҚ",""],
+        ["ТАРИХ: 5.3-АПТА №3 ВИДЕОСАБАҚ",""],
+        ["ТАРИХ: 5.3-АПТА №4 ВИДЕОСАБАҚ",""],
+        ["ТАРИХ: 5.3-АПТА №5 ВИДЕОСАБАҚ",""],
+        ["4-АЙ 1-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ",""],
+        ["4-АЙ 1-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ",""],
+        ]],
+        ["4-апта",
+       [["ТАРИХ: 5.4-АПТА БАЗА",""],
+        ["ТАРИХ: 5.4-АПТА №1 ВИДЕОСАБАҚ",""],
+        ["ТАРИХ: 5.4-АПТА №2 ВИДЕОСАБАҚ",""],
+        ["ТАРИХ: 5.4-АПТА №3 ВИДЕОСАБАҚ",""],
+        ["ТАРИХ: 5.4-АПТА №4 ВИДЕОСАБАҚ",""],
+        ["ТАРИХ: 5.4-АПТА №5 ВИДЕОСАБАҚ",""],
+        ["4-АЙ 1-АПТА 1 ПРАКТИКАЛЫҚ САБАҚ",""],
+        ["4-АЙ 1-АПТА 2 ПРАКТИКАЛЫҚ САБАҚ",""],
+        ]],
+    ]],
+  ]);
+  
+
+
+   addSubject("Геометрия", "https://juz40-edu.kz/assets/img/subjects/geometry.jpg", [
+     ["1-АЙ", [
+        ["1-апта",
+       [
+        ["Геометриялық ұғымдар 1-ші бөлім","https://kinescope.io/x3soNfAESJPoGB62xHvoBa"],
+        ["Геометриялық ұғымдар 2-ші бөлім","https://kinescope.io/cfmHTfxoEAaEttarbjD9d6"],
+        ["Геометриялық ұғымдар 3-ші бөлім","https://kinescope.io/kt6VU5ygAKpS6Ui85knRaV"],
+        ["Геометриялық ұғымдар 4-ші бөлім","https://kinescope.io/dB9o9LWJLpn58yjfybaEiJ"],
+       ["Үшбұрыш және оның түрлері 1-ші бөлім","https://kinescope.io/8znaiVvMABs7uNbbsWn8QU"],
+       ["Үшбұрыш және оның түрлері 2-ші бөлім","https://kinescope.io/gNPiwdyFnTF6V91qGdwBYH"],
+       ["Үшбұрыш және оның түрлері 3-ші бөлім","https://kinescope.io/wFghDHo7NWwtQniK1cj6e5"],
+       ["Үшбұрыштар теңсіздігі 1-бөлім","https://kinescope.io/qjESuaHBXrxZNdLjteyQCD"],
+       ["Үшбұрыштар теңсіздігі 2-ші бөлім (Пифагор теоремасы)","https://kinescope.io/4oAaBoon1J5jRxVm3cszfL"],
+       ["Косинустар теоремасы 1-ші бөлім","https://kinescope.io/eF91yh5UmSnkEt8nxULQut"],
+       ["Косинустар теоремасы 2-ші бөлім","https://kinescope.io/oB3iGMiYY2eevYAnwT8M9U"],
+       ["Синустар теоремасы","https://kinescope.io/r3rBwhLdy4Sdzm5qcbxdaq"],
+       ["Үшбұрыштың тамаша нүктелері мен кесінділері 1-ші тақырыпша","https://kinescope.io/7qEXH3N5hUXshS3LGWMkN2"],
+       ["Ушбұрыштың тамаша нүктелері мен кесінділері 2-ші тақырыпша 1-бөлім","https://kinescope.io/vvmNMN7WSL1ak1fUZNJjQy"],
+       ["Үшбұрыштың тамаша нүктелері мен кесінділері 2- тақырыпша 2-ші бөлім","https://kinescope.io/g4wp4EF8BJdWKkmq9ZPZtW"],
+       ["Үшбұрыштың тамаша нүктелері мен кесінділері 3-ші тақырыпша 1-ші бөлім","https://kinescope.io/qGtSkN5vDijN3zq9qi8noW"],
+       ["Үшбұрыштың тамаша нүктелері мен кесінділері 3-ші тақырыпша 2-бөлім","https://kinescope.io/icpDs8tmDaRjJMyMbKmf3d"],
+       ["Үшбұрыштың тамаша нүктелері мен кесінділері 4-ші тақырыпша 1-бөлім","https://kinescope.io/c14svoQzWwHK6j9CdaDK8g"],
+       ["Үшбұрыштың тамаша нүктелері мен кесінділері 4-ші тақырыпша 2-бөлім","https://kinescope.io/85zkHWjXmvBd7zVgYsG8j2"],
+       ["Үшбұрыштың ауданы 1-ші бөлім","https://kinescope.io/vRPVEzRSRufJt8JGdfwyze"],
+       ["Үшбұрыштың ауданы 2-ші бөлім","https://kinescope.io/3QvEo1bibPS3J7VFB3b4yv"],
+       ["Үшбұрыштың ауданы 3-ші бөлім","https://kinescope.io/3bJi5GwyoYaB2FEL6XU7w7"],
+       ["Теңбүйірлі және теңқабырғалы үшбұрыштар 1-ші бөлім","https://kinescope.io/nGvr6UH4F5xdox3nugiwE1"],
+       ["Теңбүйірлі және теңқабырғалы үшбұрыштар 2-ші бөлім","https://kinescope.io/0Jr7Ng7XT1Cjws8MEc3LxM"],
+       ["Теңбүйірлі және теңқабырғалы үшбұрыштар 3-ші бөлім","https://kinescope.io/kqrtEQrTJh1ohNpHy4N2Yz"],
+       
+
+
+
+
+        ]],
+         ["2-апта",
+       [["Тікбұрышты үшбұрыш 1-бөлім","https://kinescope.io/wueiPow27baXN5Jb4zzCft?"],
+       ["Тікбұрышты үшбұрыш 2-бөлім","https://kinescope.io/fVeVhLPAiSVdFoA36LLDbq?"],
+       ["Тікбұрышты үшбұрыш 3-бөлім","https://kinescope.io/durdoJz7VKA7qiEN4u6672?"],
+       ["Ұқсас үшбұрыштар 1-бөлім","https://kinescope.io/eyiXLwCXP4AzYLYpzdNwYr?"],
+       ["Ұқсас үшбұрыштар 2-бөлім","https://kinescope.io/bCyHWdcty5w8PKZy622teq?"],
+       ["Ұқсас үшбұрыштар 3-бөлім","https://kinescope.io/umLoymtrZLXH2vLuvwEbiD?"],
+       ["Кездейсоқ төртбұрыш 1-бөлім","https://kinescope.io/4WfngGyouzhwSgvxvvxx2d?"],
+       ["Кездейсоқ төртбұрыш 2-бөлім","https://kinescope.io/h6kQG31kLdHapoBGP8GA1N?"],
+       ["Параллелограмм 1-бөлім","https://kinescope.io/7Cst2oXd2xHR2kv8Q9ozPj?"],
+       ["Параллелограмм 2-бөлім","https://kinescope.io/nC8qYyBAZ7jvcMkPCgjVvD?"],
+       ["Параллелограмм 3-бөлім","https://kinescope.io/t8uBBioxaQ3c2GVM4FSSsT?"],
+       ["Ромб 1-бөлім","https://kinescope.io/5gAUV1mN4SDV81f4r2Lt7S?"],
+       ["Ромб 2-бөлім","https://kinescope.io/p8XdK4SSRf4hSCuuA5Sa1K?"],
+       ["Тіктөртбұрыш 1-бөлім","https://kinescope.io/tqYjMADZiXedzTaJkWUi3T?"],
+       ["Тіктөртбұрыш 2-бөлім","https://kinescope.io/pWQnjJQvvJBmcFQo6rqCUX?"],
+       ["Тіктөртбұрыш 3-бөлім","https://kinescope.io/rCJ7ymNZTURfxFTbUiQfnf?"],
+       ["Шаршы 1-бөлім","https://kinescope.io/56RR91gpxHuqcLdRKVjBXu?"],
+       ["Шаршы 2-бөлім","https://kinescope.io/0bYpE8geLGdyYJHFGxGx5U?"],
+       ["Көпбұрыштар 1-бөлім","https://kinescope.io/oiqEvcaLiZzDWQwZivm2nz?"],
+       ["Көпбұрыштар 2-бөлім","https://kinescope.io/sHPr17D6J8YBLWJhZm5Skm?"],
+       ["Көпбұрыштар 3-бөлім","https://kinescope.io/3CweVo7ivGZ4chPihPn82c?"],
+       ["Көпбұрыштар 4-бөлім","https://kinescope.io/wQnp8tgHqwcXMvzkTufV7Y?"],
+       ["Трапеция 1-бөлім","https://kinescope.io/6CvYU99tXAxEQn3EAuoJtA?"],
+       ["Трапеция 2-бөлім","https://kinescope.io/rqMu3wW6DQpG9uXbRRDRiv?"],
+       ["Трапеция 2-бөлім","https://kinescope.io/soVHv5pAyU57YTrqCwUetR?"],
+       ["Трапеция 3-бөлім","https://kinescope.io/twRKSJhSfNmCgVQYx5jS43?"],
+       ["Трапеция 4-бөлім","https://kinescope.io/5SxkVnokkY3fdTmEMp6bNL?"],
+
+
+       
+
+       
+
+
+        ]],
+        ["3-апта",
+       [["Шеңбер 1-бөлім","https://kinescope.io/oEGHe1rFaapCxSWkEsNBSX"],
+       ["Шеңбер 2-бөлім","https://kinescope.io/2XbuxcAaR6YXcpmRfVRC9b"],
+       ["Шеңбер 3-бөлім","https://kinescope.io/7CMr2zTEqGLfzrAZa7VoJr"],
+       ["Шеңбер 4-бөлім","https://kinescope.io/h6JDBeUm7uRi6jXMQnKPZx?"],
+       ["Шеңбер 5-бөлім","https://kinescope.io/8RNDLnfjfsE2pFFMMLxHds?"],
+       ["Шеңбер 6-бөлім","https://kinescope.io/bcweBGGjQxcGeoYvgPe5tP?"],
+       ["Шеңбер 7-бөлім","https://kinescope.io/dwWjbVXN2XkPaUaDAirFnh?"],
+       ["Тікбұрышты координаталар жүйесі Шеңбердің теңдеуі 1-бөлім","https://kinescope.io/ocdZVxcCons87GU8cWebCU?"],
+       ["Тікбұрышты координаталар жүйесі Шеңбердің теңдеуі 2-бөлім","https://kinescope.io/f4NnrTdbigd4sHWR4XmbMe?"],
+       ["Тікбұрышты координаталар жүйесі Түзудің теңдеуі 1-бөлім","https://kinescope.io/hYg3nJpsPmr4dc9WU4vwN7?"],
+       ["Тікбұрышты координаталар жүйесі Түзудің теңдеуі 2-бөлім","https://kinescope.io/uTGmXoW68zu1n2pqWfpSny?"],
+       ["Тікбұрышты координаталар жүйесі Түзудің теңдеуі 3-бөлім","https://kinescope.io/7N4iuk8QNUYa6t3aEzgMsS?"],
+       ["Тікбұрышты координаталар жүйесі. Кесінді 1-бөлім","https://kinescope.io/nGwFigYf8rnpADgF1egZ4J?"],
+       ["Тікбұрышты координаталар жүйесі. Кесінді 2-бөлім","https://kinescope.io/jQesSnrrfqeqAWkHVotvY2?"],
+       ["Тікбұрышты координаталар жүйесі. Кесінді 3-бөлім","https://kinescope.io/dPTroho3Y1g9PM1dUYLQt9?"],
+        ]],
+        ["4-апта",
+       [["Стеореметрия элементтері 1-бөлім","https://kinescope.io/fVYMBctQTmU1HRExYArHdS"],
+       ["Стеореметрия элементтері 2-бөлім","https://kinescope.io/uMNDg2vnTgeFf8fCshJrd5"],
+       ["Стеореметрия элементтері 3-бөлім","https://kinescope.io/3oC2p7GaSLnzwTcedL43FL"],
+       ["Стеореметрия элементтері 4-бөлім","https://kinescope.io/dnEyJ4AtnGEnTMVP6Vuv2H"],
+       ["Призма 2-бөлім","https://kinescope.io/deKJnbbNSPbUDDTW6Ae5KX"],
+       ["Призма 3-бөлім","https://kinescope.io/74u6di2RAVnSR2pULWZBNf"],
+       ["Призма 4-бөлім","https://kinescope.io/eJ7ST6LyLA1CniV8zavzux"],
+       ["Призма 5-бөлім","https://kinescope.io/gvgJiMu7gBGpJb9GKbHE3G"],
+       ["Призма 6-бөлім","https://kinescope.io/tMJrgDNjFoLq3Fq5ruK6iy"],
+       ["Цилиндр 1-бөлім","https://kinescope.io/ft6o2hTCTS1ifQbaMHXFQ5"],
+       ["Цилиндр 2-бөлім","https://kinescope.io/uFkEmCUqL3ZUXTXJVVRm5Q"],
+       ["Цилиндр 3-бөлім","https://kinescope.io/fJMLLATfUDD9S4jNkbhpBQ"],
+       ["Цилиндр 4-бөлім","https://kinescope.io/r9z7nRVNAWLvxszfvBUiVx"],
+       ["Конус 1-бөлім","https://kinescope.io/b6DTjb3fpNLGaMKF3E3HtF"],
+       ["Конус 2-бөлім","https://kinescope.io/mpvVQX3e2HCKD4zURCukK3"],
+       ["Конус 3-бөлім","https://kinescope.io/fbn2qDB4tEh34xzbGPjuP5"],
+       ["Конус 4-бөлім","https://kinescope.io/eARTr2kWE3XD9XRNA3qzaE"],
+       ["Пирамида 1-бөлім1","https://kinescope.io/b8mG4JzgB9buUCshJKMigR"],
+       ["Пирамида 2-бөлім1","https://kinescope.io/wS2Bo7x4eHuimx6DnU3Hwg"],
+       ["Пирамида 3-бөлім1","https://kinescope.io/e6napbm8T1azyzRcspjxBm"],
+       ["Пирамида 4-бөлім1","https://kinescope.io/rBs1hQLKjJx1vnjT5gbSS2"],
+       ["Пирамида 5-бөлім1","https://kinescope.io/93VdF9i2R5WRUnTVf9Vt81"],
+       ["Шар. Сфера 1-бөлім","https://kinescope.io/fVy2Umo7T5Pq3YQusxovnZ"],
+       ["Шар. Сфера 2-бөлім","https://kinescope.io/tWrSvTdjwHZ9pH56zjRGJw"],
+       ["Шар. Сфера 3-бөлім","https://kinescope.io/kUtaHDQW77JJMTVrWuzU2R"],
+       ["Шар. Сфера 4-бөлім","https://kinescope.io/aALJ6xf9dvu3nowVSR7KCP"],
+       ["Шар. Сфера 5-бөлім","https://kinescope.io/hfkgLqHRUHz7c7AbUwevbN"],
+       ["Вектор 1-бөлім","https://kinescope.io/5YhpTjuqWAuKuzWFyU8ZYw"],
+       ["Вектор 2-бөлім","https://kinescope.io/mo15AmbzTdWNfj4igcTaYj"],
+       ["Вектор 3-бөлім","https://kinescope.io/eEQBaVGfoWAo5tyiqyRYdc"],
+       ["Вектор 4-бөлім","https://kinescope.io/7JNzx8yVpRWo6HAHL98JNM"],
+       ["Вектор 5-бөлім","https://kinescope.io/iY8PjWi13BLwwRPxxYmpjK"],
+       ["Вектор 6-бөлім","https://kinescope.io/k77io2qWixTnRkJD2xWHdK"],
+       ["Вектор 7-бөлім","https://kinescope.io/nL3hCsFMu3FUsa3WRRVYzs"],
+       ["Вектор 8-бөлім","https://kinescope.io/6dWoZofuD1BCpECcB7BwLW"],
+        ]],
+
+
+        
+     ]],
+
+  
+
+     
+     
+   ]);
+   addSubject("Информатика", "https://juz40-edu.kz/assets/img/subjects/informatics.jpg", [
+    ["5 АЙ", [
+      ["1-апта", [
+        ["Ақпараттық қауіпсіздік. Ақпаратты қорғау әдістері", "https://kinescope.io/d7WTWYGqPLQ4e9opnyxhvP?v=2.172.0&_=cGxheWVySWQ9ZGJlZjdlOTEtMDc0YS00NzYxLWJjZjQtNGJiYWYxMmIwMzdkJnNpemUlNUJ3aWR0aCU1RD0xMDAlMjUmc2l6ZSU1QmhlaWdodCU1RD0xMDAlMjUmYmVoYXZpb3IlNUJwcmVsb2FkJTVEPXRydWUmYmVoYXZpb3IlNUJsb2NhbFN0b3JhZ2UlNUQ9ZmFsc2U%3D"],
+        ["Қазақстандағы цифрландыру", "https://kinescope.io/i1tLwA4QvFY4tD5TuEKPbs?v=2.172.0&_=cGxheWVySWQ9MTU3ZWJiZTAtNjAxZS00NTEyLTkyNWMtODU3NWMxNGExMDFiJnNpemUlNUJ3aWR0aCU1RD0xMDAlMjUmc2l6ZSU1QmhlaWdodCU1RD0xMDAlMjUmYmVoYXZpb3IlNUJwcmVsb2FkJTVEPXRydWUmYmVoYXZpb3IlNUJsb2NhbFN0b3JhZ2UlNUQ9ZmFsc2U%3D"],
+        ["Ақпараттарды құқықтық қорғау. ЭЦҚ", "https://kinescope.io/3i2iJhRpxdWTsvHoMu1HHP?v=2.172.0&_=cGxheWVySWQ9Njk2YzBjNWEtZWRlOC00ZWRlLWIyZjAtNTA0NzM1MTljNjIwJnNpemUlNUJ3aWR0aCU1RD0xMDAlMjUmc2l6ZSU1QmhlaWdodCU1RD0xMDAlMjUmYmVoYXZpb3IlNUJwcmVsb2FkJTVEPXRydWUmYmVoYXZpb3IlNUJsb2NhbFN0b3JhZ2UlNUQ9ZmFsc2U%3D"],
+        ["[БАЗА] Идентификациялау-әдістері", "https://files-api5.juz40-edu.kz/prod-bucket/methodist/course/c04dc9c2-d20c-46cc-8e69-669877b1e71d/d17ef7ef-69f8-40be-95c4-6f8dfef18b62_%D0%98%D0%B4%D0%B5%D0%BD%D1%82%D0%B8%D1%84%D0%B8%D0%BA%D0%B0%D1%86%D0%B8%D1%8F%D0%BB%D0%B0%D1%83-%D3%99%D0%B4%D1%96%D1%81%D1%82%D0%B5%D1%80%D1%96.pdf"],
+        ["[БАЗА] Ақпараттарды-құқықтық-қорғау", "https://files-api5.juz40-edu.kz/prod-bucket/methodist/course/c04dc9c2-d20c-46cc-8e69-669877b1e71d/23f8a25e-1483-4938-9051-0fa61a8cf054_%D0%90%D2%9B%D0%BF%D0%B0%D1%80%D0%B0%D1%82%D1%82%D0%B0%D1%80%D0%B4%D1%8B-%D2%9B%D2%B1%D2%9B%D1%8B%D2%9B%D1%82%D1%8B%D2%9B-%D2%9B%D0%BE%D1%80%D2%93%D0%B0%D1%83.pdf"],
+        ["[БАЗА] Ақпараттық-қауіпсіздік", "https://files-api5.juz40-edu.kz/prod-bucket/methodist/course/c04dc9c2-d20c-46cc-8e69-669877b1e71d/e6d03e08-f21d-4a91-9d9e-ca0ad09bef01_%D0%90%D2%9B%D0%BF%D0%B0%D1%80%D0%B0%D1%82%D1%82%D1%8B%D2%9B-%D2%9B%D0%B0%D1%83%D1%96%D0%BF%D1%81%D1%96%D0%B7%D0%B4%D1%96%D0%BA.pdf"],
+        ["[БАЗА] Қазақстанды-цифрландыру", "https://files-api5.juz40-edu.kz/prod-bucket/methodist/course/c04dc9c2-d20c-46cc-8e69-669877b1e71d/e408483a-13d1-49a4-88e8-4571c62105f0_%D2%9A%D0%B0%D0%B7%D0%B0%D2%9B%D1%81%D1%82%D0%B0%D0%BD%D0%B4%D1%8B-%D1%86%D0%B8%D1%84%D1%80%D0%BB%D0%B0%D0%BD%D0%B4%D1%8B%D1%80%D1%83.pdf"],
+        ["[БАЗА] Электронды-үкімет", "https://files-api5.juz40-edu.kz/prod-bucket/methodist/course/c04dc9c2-d20c-46cc-8e69-669877b1e71d/a45fac95-ce2d-4933-a454-fd92fab05085_%D0%AD%D0%BB%D0%B5%D0%BA%D1%82%D1%80%D0%BE%D0%BD%D0%B4%D1%8B-%D2%AF%D0%BA%D1%96%D0%BC%D0%B5%D1%82.pdf"],
+        ["[БАЗА] Ақпаратты-қорғау-әдістері", "https://files-api5.juz40-edu.kz/prod-bucket/methodist/course/c04dc9c2-d20c-46cc-8e69-669877b1e71d/d3aa19b9-0b76-4e14-a72d-9086c9ec0bf7_%D0%90%D2%9B%D0%BF%D0%B0%D1%80%D0%B0%D1%82%D1%82%D1%8B-%D2%9B%D0%BE%D1%80%D2%93%D0%B0%D1%83-%D3%99%D0%B4%D1%96%D1%81%D1%82%D0%B5%D1%80%D1%96.pdf"],
+        ["[БАЗА] ЭЦҚ-және-сертификат", "https://files-api5.juz40-edu.kz/prod-bucket/methodist/course/c04dc9c2-d20c-46cc-8e69-669877b1e71d/212a372f-929f-4d5a-9d8d-9f7820015da3_%D0%AD%D0%A6%D2%9A-%D0%B6%D3%99%D0%BD%D0%B5-%D1%81%D0%B5%D1%80%D1%82%D0%B8%D1%84%D0%B8%D0%BA%D0%B0%D1%82.pdf"],
+        ["№33 ПРАКТИКАЛЫҚ САБАҚ", "https://drive.google.com/file/d/17jGkQUr6_i8cfB_vs940qYolM_2bVdgY/view?usp=sharing"],
+        ["№34 ПРАКТИКАЛЫҚ САБАҚ", "https://drive.google.com/file/d/1_SXksVLciK6C4EMrqfkaEv65O9qAUQ87/view?usp=sharing"],
+        ["5-АЙ 1-АПТА | QUIZ ТЕСТ", "https://wayground.com/join?gc=43057926&source=liveDashboard"],
+        
+
+      ]],
+       ["2-апта", [
+        ["", ""],
+        ["", ""],
+        ["", ""],
+        ["", ""],
+        ["3-апта", [
+        ["", ""],
+        ["", ""],
+        ["", ""],
+        ["", ""],
+
+
+    ]],
+      ["", ""],
+      ["", ""],
+      ["", ""],
+      ["", ""],
+      ["", ""],
+
+
+    ]],
+        
+    ]],
+    ]);
+
+  /* ------- RENDERING LOGIC ------- */
+  function renderSubjects(){
+    subjectsList.innerHTML = '';
+    state.subjects.forEach(s=>{
+      const card = el('div',{class:'subject-card', 'data-id':s.id});
+      const img = document.createElement('img'); img.src = s.icon || 'data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"160\" height=\"100\"></svg>';
+      img.style.width='56px'; img.style.height='40px'; img.style.objectFit='cover'; img.style.borderRadius='8px';
+      const nameWrap = el('div',{class:'subject-name', html:s.name});
+      const wrapper = el('div',{style:'display:flex;gap:12px;align-items:center'});
+      wrapper.appendChild(img); wrapper.appendChild(nameWrap);
+      card.appendChild(wrapper);
+      card.onclick = ()=>{ selectSubject(s.id); };
+      subjectsList.appendChild(card);
+    });
+    // show subjects view
+    subjectsView.style.display = '';
+    subjectDetail.style.display = 'none';
+    pageTitle.textContent = 'САНДЫҚ';
+    videoTitle.textContent = 'Пән таңдаңыз';
+    playerPreview.innerHTML = 'Плеер';
+    materialsList.innerHTML = 'Мұнда PDF сілтемелері көрсетіледі.';
+    logoutBtn.style.display = 'none';
+  }
+
+  function selectSubject(subjectId){
+    current.subjectId = subjectId;
+    const subj = state.subjects.find(x=>x.id===subjectId);
+    current.monthId = subj?.months?.[0]?.id || null;
+    current.weekId = subj?.months?.[0]?.weeks?.[0]?.id || null;
+    current.lessonId = null;
+    subjectsView.style.display = 'none';
+    subjectDetail.style.display = '';
+    pageTitle.textContent = subj.name;
+    renderMonths(); renderWeeks(); renderLessons();
+    logoutBtn.style.display = '';
+  }
+
+  function renderMonths(){
+    monthsTabs.innerHTML = '';
+    const subj = state.subjects.find(s=>s.id===current.subjectId);
+    if(!subj) return;
+    subj.months.forEach(m=>{
+      const b = el('button',{class:'tab'+(current.monthId===m.id?' active':''), 'data-id':m.id, html:m.title});
+      b.onclick = ()=>{ current.monthId = m.id; current.weekId = null; renderWeeks(); renderMonths(); renderLessons(); };
+      monthsTabs.appendChild(b);
+    });
+    if(!current.monthId && subj.months.length){ current.monthId = subj.months[0].id; renderMonths(); }
+  }
+
+  function renderWeeks(){
+    weeksTabs.innerHTML = '';
+    const subj = state.subjects.find(s=>s.id===current.subjectId);
+    if(!subj) return;
+    const month = subj.months.find(m=>m.id===current.monthId);
+    if(!month) return;
+    month.weeks.forEach(w=>{
+      const b = el('button',{class:'tab'+(current.weekId===w.id?' active':''), 'data-id':w.id, html:w.title});
+      b.onclick = ()=>{ current.weekId = w.id; renderWeeks(); renderLessons(); };
+      weeksTabs.appendChild(b);
+    });
+    if(!current.weekId && month.weeks.length){ current.weekId = month.weeks[0].id; renderWeeks(); }
+  }
+
+  // ---- updated renderLessons with PDF icon support ----
+  function renderLessons(){
+    lessonsEl.innerHTML = '';
+    const subj = state.subjects.find(s=>s.id===current.subjectId);
+    if(!subj) return;
+    const month = subj.months.find(m=>m.id===current.monthId);
+    if(!month) return;
+    const week = month.weeks.find(w=>w.id===current.weekId);
+    if(!week) return;
+
+    // collect materials for right panel
+    const materials = [];
+
+    week.resources.forEach(r=>{
+      const isPdf = (r.type && r.type.toLowerCase()==='pdf') || (typeof r.url==='string' && r.url.toLowerCase().endsWith('.pdf'));
+      const icon = isPdf ? pdfIcon() : playIcon();
+      const it = el('div',{class:'lesson-item','data-id':r.id});
+      it.innerHTML = `<div class="lesson-thumb">${icon}</div><div style="flex:1"><div class="lesson-title">${r.title}</div></div>`;
+      it.onclick = ()=>{ selectLesson(r); document.querySelectorAll('.lesson-item').forEach(x=>x.classList.remove('active')); it.classList.add('active'); };
+      lessonsEl.appendChild(it);
+
+      if(isPdf) materials.push(r);
+    });
+    // render materials list (right side)
+    if(materials.length){
+      materialsList.innerHTML = '';
+      materials.forEach(m=>{
+        const a = document.createElement('a');
+        a.href = m.url;
+        a.target = '_blank';
+        a.textContent = '📄 ' + m.title;
+        a.style.display = 'block';
+        a.style.marginBottom = '8px';
+        a.style.color = 'var(--muted)';
+        materialsList.appendChild(a);
+      });
+    } else {
+      materialsList.innerHTML = 'Бұл апталық материалдарда PDF жоқ.';
+    }
+
+    applySearch();
+  }
+
+  // changed selectLesson: if PDF -> show button linking to new tab; else iframe
+  function selectLesson(r){
+    current.lessonId = r.id;
+    videoTitle.textContent = r.title;
+    const isPdf = (r.type && r.type.toLowerCase()==='pdf') || (typeof r.url==='string' && r.url.toLowerCase().endsWith('.pdf'));
+
+    if(isPdf){
+      playerPreview.innerHTML = `
+        <div style="display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;height:100%">
+          <div style="font-weight:700">PDF материал</div>
+          <a href="${r.url}" target="_blank" style="padding:10px 16px;background:var(--accent);color:#fff;border-radius:8px;text-decoration:none;">PDF ашу</a>
+        </div>
+      `;
+    } else {
+      playerPreview.innerHTML = `<iframe src="${r.url}" allowfullscreen></iframe>`;
+    }
+  }
+
+  // search filter
+  function applySearch(){
+    const q = (searchInput?.value || '').toLowerCase().trim();
+    document.querySelectorAll('.lesson-item').forEach(node=>{
+      const title = node.querySelector('.lesson-title').textContent.toLowerCase();
+      node.style.display = title.includes(q) ? '' : 'none';
+    });
+  }
+  searchInput?.addEventListener('input', applySearch);
+
+  // HOME button -> show subjects
+  homeBtn.addEventListener('click', ()=>{
+    current.subjectId = null; current.monthId = null; current.weekId = null; current.lessonId = null;
+    renderSubjects();
+  });
+
+  // LOGOUT button
+  logoutBtn.addEventListener('click', ()=>{
+    sessionStorage.removeItem(AUTH_KEY);
+    showAuth(true);
+  });
+
+  /* ------------- AUTH / PASSWORD ------------- */
+  function isAuthed(){ return sessionStorage.getItem(AUTH_KEY) === '1'; }
+
+  function showAuth(show){
+    if(show){
+      pwOverlay.style.display = 'flex';
+      pwInput.value = '';
+      pwError.style.display = 'none';
+    } else {
+      pwOverlay.style.display = 'none';
+    }
+  }
+
+  function tryAuth(val){
+    if(!val) return false;
+    if(val === SITE_PASSWORD){
+      sessionStorage.setItem(AUTH_KEY,'1');
+      showAuth(false);
+      // initial render after auth
+      renderSubjects();
+      return true;
+    } else {
+      pwError.style.display = 'block';
+      return false;
+    }
+  }
+
+  pwSubmit.addEventListener('click', ()=>{ tryAuth(pwInput.value); });
+  pwInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter') tryAuth(pwInput.value); });
+
+  // on load: check auth
+  if(!isAuthed()){
+    // hide page interaction until auth
+    showAuth(true);
+  } else {
+    renderSubjects();
+  }
+
+  // expose for debug
+  window.__JUZ_STATE = state;
+
+})();
+</script>
+</body>
+</html>
